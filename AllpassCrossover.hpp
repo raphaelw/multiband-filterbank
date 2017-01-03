@@ -33,8 +33,12 @@ public:
     
     //------------------------------
     
+    // setBeta, setBiquad
+    // init() ?
     
-    inline int process(T *input, T *output, int numSamples, AllpassState<T> *state) {
+    // tuneCrossoverFrequency(T frequency);
+    
+    inline void process(T *input, T *output, int numSamples, AllpassState<T> *state) {
         T q_nm1 = state->q_nm1;
         T p_nm1 = state->p_nm1;
         
@@ -56,6 +60,25 @@ public:
             
             output[i] = y;
             
+        }
+        
+        state->q_nm1 = q_nm1;
+        state->p_nm1 = p_nm1;
+    }
+    
+    inline void processHB(T *input, T *output, int numSamples, AllpassState<T> *state) {
+        T q_nm1 = state->q_nm1;
+        T p_nm1 = state->p_nm1;
+        
+        for (int i=0; i<numSamples; i++) {
+            T x = input[i];
+            
+            // for allpass/HB case: b0 = a2 = beta; b1 = a1 = 0; b2 = a0 = 1
+            T y = q_nm1 + beta*x;
+            q_nm1 = p_nm1;
+            p_nm1 = x - beta*y;
+
+            output[i] = y;
         }
         
         state->q_nm1 = q_nm1;
