@@ -60,7 +60,7 @@ int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, 
         
         // write result
         squaredPolesIt[0] = b;
-        squaredPolesIt += 1;
+        squaredPolesIt++;
         
         // check if sorting is needed; b should be ascending
         if (b < lastSquaredPole) {
