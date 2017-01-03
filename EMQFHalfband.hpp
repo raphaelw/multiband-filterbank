@@ -115,11 +115,11 @@ int getEMQFHalfbandFilterByStopbandAttenuation(int numPairs, T As, T* squaredPol
 // Test
 /*
  getEMQFHalfbandFilterByStopbandAttenuation<double>(5, 44.3, &(betas.front()))
- [0]	double	0.96809905095653459
- [1]	double	0.88490160827223596
- [2]	double	0.73576067807786805
- [3]	double	0.4798065522788309
- [4]	double	0.16166891167226929
+ [0]	double	0.16166891167226929	
+ [1]	double	0.4798065522788309	
+ [2]	double	0.73576067807786805	
+ [3]	double	0.88490160827223596	
+ [4]	double	0.96809905095653459
  */
     
 } // namespace afx
