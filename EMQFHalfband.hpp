@@ -24,6 +24,7 @@ namespace afx {
  squaredPoles : array
    [Result] Will contain the squared magnitudes of the purely imaginary poles (called beta in the literature).
    Size must be numPairs. Ascending order.
+   (Note that the final filter contains a pole at z=0)
  
  ----------
  Filter design steps according to
@@ -87,6 +88,7 @@ int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, 
  squaredPoles : array
    [Result] Will contain the squared magnitudes of the purely imaginary poles (called beta in the literature).
    Size must be numPairs. Ascending order.
+   (Note that the final filter contains a pole at z=0)
  
  ----------
  Filter design steps according to
