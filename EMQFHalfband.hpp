@@ -32,7 +32,7 @@ namespace afx {
  10.3.5 Zeros, Poles and Q-Factors
  */
 template <typename T>
-int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, T* squaredPoles) {
+int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, T *squaredPoles) {
     int fail = 0;
 
     if (numPairs <= 0) { // check params
@@ -97,7 +97,7 @@ int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, 
    Design of Half-Band IIR Filters for Given Passband or Stopband Attenuation
  */
 template <typename T>
-int getEMQFHalfbandFilterByStopbandAttenuation(int numPairs, T As, T* squaredPoles) {
+int getEMQFHalfbandFilterByStopbandAttenuation(int numPairs, T As, T *squaredPoles) {
     T n = (numPairs*2) + 1;
     
     T L = std::pow(T(10), As/T(10)) - T(1);
