@@ -5,6 +5,9 @@
 //  Copyright (c) 2016 Raphael Pistachio. All rights reserved.
 //
 
+#include <algorithm>
+#include <functional>
+
 #include <cmath>
 
 #include <boost/math/special_functions/ellint_1.hpp>
@@ -20,7 +23,7 @@ namespace afx {
    Selectivity factor (usually xi in the literature)
  squaredPoles : array
    [Result] Will contain the squared magnitudes of the purely imaginary poles (called beta in the literature).
-   Size must be numPairs.
+   Size must be numPairs. Ascending order.
  
  ----------
  Filter design steps according to
@@ -37,10 +40,15 @@ int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, 
     
     if (fail) {return fail;}
     
+    T* squaredPolesIt = squaredPoles;
+    
+    bool sortNeeded = false;
+    T lastSquaredPole = -1;
+    
     T a = selectivityFactor;
     T n = (numPairs*2) + 1;
     T k = T(1)/a;
-    for (int i=1; i<(numPairs+1); i++) {
+    for (int i=numPairs; i>0; i--) {
         T ind = T(i);
         
         T u = ((2*ind-1)/n + T(1)) * boost::math::ellint_1(k);
@@ -50,7 +58,18 @@ int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, 
         T b = ((a+X*X) - std::sqrt((T(1)-X*X)*(a*a-X*X)) ) / ((a+X*X) + std::sqrt((T(1)-X*X)*(a*a-X*X)));
         
         // write result
-        squaredPoles[i-1] = b;
+        squaredPolesIt[0] = b;
+        squaredPolesIt += 1;
+        
+        // check if sorting is needed; b should be ascending
+        if (b < lastSquaredPole) {
+            sortNeeded = true;
+        }
+        lastSquaredPole = b;
+    }
+    
+    if (sortNeeded) {
+        std::sort(squaredPoles, squaredPoles+numPairs);
     }
     
     return fail;
@@ -67,7 +86,7 @@ int getEMQFHalfbandFilterBySelectivityFactor(int numPairs, T selectivityFactor, 
    Stopband attenuation given in dB.
  squaredPoles : array
    [Result] Will contain the squared magnitudes of the purely imaginary poles (called beta in the literature).
-   Size must be numPairs.
+   Size must be numPairs. Ascending order.
  
  ----------
  Filter design steps according to
