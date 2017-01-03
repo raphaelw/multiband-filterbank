@@ -6,12 +6,12 @@
 //
 
 #include <algorithm>
-#include <functional>
 
 #include <cmath>
 
 #include <boost/math/special_functions/ellint_1.hpp>
 #include <boost/math/special_functions/jacobi_elliptic.hpp>
+
 namespace afx {
 
 /*
