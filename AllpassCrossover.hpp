@@ -73,10 +73,17 @@ public:
         for (int i=0; i<numSamples; i++) {
             T x = input[i];
             
-            // for allpass/HB case: b0 = a2 = beta; b1 = a1 = 0; b2 = a0 = 1
-            T y = q_nm1 + beta*x;
-            q_nm1 = p_nm1;
-            p_nm1 = x - beta*y;
+            T y;
+            if (isBiquad) {
+                // for allpass/HB case: b0 = a2 = beta; b1 = a1 = 0; b2 = a0 = 1
+                y = q_nm1 + beta*x;
+                q_nm1 = p_nm1;
+                p_nm1 = x - beta*y;
+            } else {
+                // pure Delay
+                y = q_nm1;
+                q_nm1 = x;
+            }
 
             output[i] = y;
         }
