@@ -55,6 +55,7 @@ public:
         
         this->beta = beta;
         this->isBiquad = isBiquad;
+        // IDEA: tune here to half-band
     }
     
     inline void tuneCrossoverFrequency(T alpha_1, T alpha) {
@@ -148,6 +149,76 @@ public:
 // processHB(int channel, int numSamples, in, outLow, outHigh)
 // processPhase(int channel, int numSamples, in, out)
     
+// no bounds checking is done by this class, make shure you allocated engough states & filters
+template <typename T>
+class Crossover {
+    AllpassFilterStateless<T>* filters;
+    AllpassState<T>* states;
+    
+    int numFiltersPerChannel;
+    int numChannels;
+    int offset; // offset to the second filter within the channel
+public:
+    Crossover() {
+        reset();
+    }
+    
+    inline void init(AllpassFilterStateless<T>* filters, AllpassState<T>* states, int numChannels = 1) {
+        reset();
+        this->filters = filters;
+        this->states = states;
+    }
+    
+    inline void reset() {
+        numFiltersPerChannel = numChannels = offset = 0;
+    }
+    
+    inline void setEMQFHalfbandFilter(T* betas, int numPairs, int numChannels) {
+        numFiltersPerChannel = numPairs+1;
+        
+        bool firstSection;
+        if (numPairs%2) {
+            // section containing the real pole has lower order
+            offset = (numPairs+1)/2;
+            firstSection = true;
+        } else {
+            // section without real pole has lower order
+            offset = (numPairs/2);
+            firstSection = false;
+        }
+        
+        AllpassFilterStateless<T>* firstSectionFilter  = filters+offset-1;
+        AllpassFilterStateless<T>* secondSectionFilter = filters+numFiltersPerChannel-1;
+        
+        for (int i = 0; i < numFiltersPerChannel; i++) {
+            T beta = 0;
+            bool isBiquad = true;
+            
+            if (i == 0) { // real pole
+                isBiquad = false;
+            } else {
+                isBiquad = true;
+                beta = betas[i-1];
+            }
+            
+            if (firstSection) {
+                firstSectionFilter->init(isBiquad, beta);
+                firstSectionFilter--;
+            } else {
+                secondSectionFilter->init(isBiquad, beta);
+                secondSectionFilter--;
+            }
+            
+            firstSection = (!firstSection); // switch section
+        }
+        
+        for (int i = 0; i < (numChannels*numFiltersPerChannel); i++) {
+            states[i] = AllpassState<T>();
+        }
+    }
+    
+    
+};
 
 
     
