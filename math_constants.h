@@ -1,11 +1,12 @@
 //
-//  constants.hpp
+//  math_constants.h
 //
 //  Created by Raphael Pistachio
 //  Copyright (c) 2016 Raphael Pistachio. All rights reserved.
 //
 
-#pragma once
+#ifndef __AFX_MATH_CONSTANTS__
+#define __AFX_MATH_CONSTANTS__
 
 // PI
 #ifndef M_PI
@@ -31,4 +32,7 @@ namespace afx {
     //T const pi = std::acos(-T(1));
 
 } // namespace afx
+
+
+#endif
 
