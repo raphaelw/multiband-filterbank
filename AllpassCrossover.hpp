@@ -39,7 +39,7 @@ public:
     // setBeta, setBiquad
     // init() ?
     
-    // _tuneCrossoverFrequency(T frequency, T alpha_1, T alpha);
+    // tuneCrossoverFrequency(T frequency, T alpha_1, T alpha);
     // tuneCrossoverFrequency(T frequency);
     
     AllpassFilterStateless():a1(0),a2(0),beta(0),isBiquad(true) {}
