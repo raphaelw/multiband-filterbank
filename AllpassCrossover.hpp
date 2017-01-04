@@ -26,6 +26,7 @@ struct AllpassState {
 
 
 // stateless (does not own delays) 2nd order allpass, transposed direct form II
+// usage: init, tune, process
 template <typename T>
 class AllpassFilterStateless {
 public:
@@ -136,7 +137,17 @@ public:
     }
 };
 
+// crossover owns state, which is allocated outside
+// setFilters(AllpassFilterStateless*, int numFilterPerChannel)
+// setChannels(AllpassState*, int numChannels)
 
+// setEMQFHalfbandFilter(T* betas, int numPairs) // distribute poles and reset states
+// tuneCrossoverFrequency(T f) // iter and tune
+
+// process(int channel, int numSamples, in, outLow, outHigh)
+// processHB(int channel, int numSamples, in, outLow, outHigh)
+// processPhase(int channel, int numSamples, in, out)
+    
 
 
     
