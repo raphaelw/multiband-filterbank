@@ -59,7 +59,6 @@ public:
             }
             
             output[i] = y;
-            
         }
         
         state->q_nm1 = q_nm1;
