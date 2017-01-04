@@ -15,10 +15,7 @@ struct AllpassState {
     T p_nm1;
     
     //------------------------------
-    AllpassState() {
-        q_nm1 = T(0);
-        p_nm1 = T(0);
-    }
+    AllpassState():q_nm1(0), p_nm1(0) {}
 };
 
 
@@ -44,12 +41,7 @@ public:
     
     // tuneCrossoverFrequency(T frequency);
     
-    AllpassFilterStateless() {
-        a1 = T(0);
-        a2 = T(0);
-        beta = T(0);
-        isBiquad = true;
-    }
+    AllpassFilterStateless():a1(0),a2(0),beta(0),isBiquad(true) {}
     
     inline void init(bool isBiquad, T beta = T(0)) {
         // reset coefficients
