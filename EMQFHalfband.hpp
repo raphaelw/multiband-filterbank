@@ -5,6 +5,9 @@
 //  Copyright (c) 2016 Raphael Pistachio. All rights reserved.
 //
 
+#pragma once
+
+
 #include <algorithm>
 
 #include <cmath>
