@@ -6,13 +6,19 @@
 //
 
 namespace afx {
-namespace emqf {
+namespace xover {
 
 // State of delays of a 2nd order allpass, transposed direct form II
 template <typename T>
 struct AllpassState {
     T q_nm1;
     T p_nm1;
+    
+    //------------------------------
+    AllpassState() {
+        q_nm1 = T(0);
+        p_nm1 = T(0);
+    }
 };
 
 
@@ -37,6 +43,23 @@ public:
     // init() ?
     
     // tuneCrossoverFrequency(T frequency);
+    
+    AllpassFilterStateless() {
+        a1 = T(0);
+        a2 = T(0);
+        beta = T(0);
+        isBiquad = true;
+    }
+    
+    inline void init(bool isBiquad, T beta = T(0)) {
+        // reset coefficients
+        a1 = T(0);
+        a2 = T(0);
+        
+        this->beta = beta;
+        this->isBiquad = isBiquad;
+    }
+    
     
     inline void process(T* input, T* output, int numSamples, AllpassState<T>* state) {
         T q_nm1 = state->q_nm1;
