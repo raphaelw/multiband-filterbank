@@ -5,6 +5,12 @@
 //  Copyright (c) 2016 Raphael Pistachio. All rights reserved.
 //
 
+#pragma once
+
+#include <cmath>
+
+#include "math_constants.h"
+
 namespace afx {
 namespace xover {
 
@@ -39,9 +45,6 @@ public:
     // setBeta, setBiquad
     // init() ?
     
-    // tuneCrossoverFrequency(T frequency, T alpha_1, T alpha);
-    // tuneCrossoverFrequency(T frequency);
-    
     AllpassFilterStateless():a1(0),a2(0),beta(0),isBiquad(true) {}
     
     inline void init(bool isBiquad, T beta = T(0)) {
@@ -51,6 +54,31 @@ public:
         
         this->beta = beta;
         this->isBiquad = isBiquad;
+    }
+    
+    inline void tuneCrossoverFrequency(T alpha_1, T alpha) {
+        if (isBiquad) {
+            T beta_i = (beta + alpha_1*alpha_1) / (beta*alpha_1*alpha_1 + T(1));
+            a1 = alpha * (T(1) + beta_i);
+            a2 = beta_i;
+        } else {
+            a1 = alpha_1;
+        }
+    }
+    
+    // Tune crossover frequency (0=DC, 1=Nyquist)
+    inline void tuneCrossoverFrequency(T frequency) {
+        T f_3dB = (T(1)-frequency)/T(2); // mirror and scale
+        
+        T alpha;
+        
+        T tang = std::tan(M_PI*f_3dB);
+        T alpha_1 = (T(1)-tang) / (T(1)+tang);
+        if (isBiquad) {
+            alpha = (T(1)-(tang*tang)) / (T(1)+(tang*tang));
+        }
+        
+        tuneCrossoverFrequency(alpha_1, alpha);
     }
     
     
