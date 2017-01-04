@@ -24,7 +24,8 @@ struct AllpassState {
     AllpassState():q_nm1(0), p_nm1(0) {}
 };
 
-
+   
+    
 // stateless (does not own delays) 2nd order allpass, transposed direct form II
 // usage: init, tune, process
 template <typename T>
@@ -58,7 +59,7 @@ public:
         // IDEA: tune here to half-band
     }
     
-    inline void tuneCrossoverFrequency(T alpha_1, T alpha) {
+    inline void __tuneCrossoverFrequency(T alpha_1, T alpha) {
         if (isBiquad) {
             T beta_i = (beta + alpha_1*alpha_1) / (beta*alpha_1*alpha_1 + T(1));
             a1 = alpha * (T(1) + beta_i);
@@ -68,8 +69,7 @@ public:
         }
     }
     
-    // Tune crossover frequency (0=DC, 1=Nyquist)
-    inline void tuneCrossoverFrequency(T frequency) {
+    inline void _tuneCrossoverFrequency(T frequency, T& _alpha_1, T& _alpha) {
         T f_3dB = (T(1)-frequency)/T(2); // mirror and scale
         
         T alpha;
@@ -80,9 +80,19 @@ public:
             alpha = (T(1)-(tang*tang)) / (T(1)+(tang*tang));
         }
         
-        tuneCrossoverFrequency(alpha_1, alpha);
+        __tuneCrossoverFrequency(alpha_1, alpha);
+        
+        _alpha_1 = alpha_1;
+        _alpha   = alpha;
     }
     
+    // Tune crossover frequency (0=DC, 1=Nyquist)
+    inline void tuneCrossoverFrequency(T frequency) {
+        T alpha_1;
+        T alpha;
+        _tuneCrossoverFrequency(frequency, alpha_1, alpha);
+    }
+
     
     inline void process(T* input, T* output, int numSamples, AllpassState<T>* state) {
         T q_nm1 = state->q_nm1;
@@ -156,7 +166,7 @@ class Crossover {
     AllpassState<T>* states;
     
     int numFiltersPerChannel;
-    int numChannels;
+    //int numChannels;
     int offset; // offset to the second filter within the channel
 public:
     Crossover() {
@@ -170,7 +180,22 @@ public:
     }
     
     inline void reset() {
-        numFiltersPerChannel = numChannels = offset = 0;
+        numFiltersPerChannel = offset = 0;
+        filters = nullptr;
+        states = nullptr;
+    }
+    
+    inline void tuneCrossoverFrequency(T f) {
+        T alpha_1;
+        T alpha;
+        for (int i=0; i<numFiltersPerChannel; i++) {
+            if (i==0) {
+                filters[i]._tuneCrossoverFrequency(f, alpha_1, alpha);
+            } else {
+                filters[i].__tuneCrossoverFrequency(alpha_1, alpha);
+            }
+        }
+        // no smoothing yet -> reset delay states too? would need numChannels
     }
     
     inline void setEMQFHalfbandFilter(T* betas, int numPairs, int numChannels) {
@@ -211,7 +236,8 @@ public:
             
             firstSection = (!firstSection); // switch section
         }
-        
+
+        // reset states
         for (int i = 0; i < (numChannels*numFiltersPerChannel); i++) {
             states[i] = AllpassState<T>();
         }
