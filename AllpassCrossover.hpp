@@ -38,7 +38,7 @@ public:
     
     // tuneCrossoverFrequency(T frequency);
     
-    inline void process(T *input, T *output, int numSamples, AllpassState<T> *state) {
+    inline void process(T* input, T* output, int numSamples, AllpassState<T>* state) {
         T q_nm1 = state->q_nm1;
         T p_nm1 = state->p_nm1;
         
@@ -65,7 +65,7 @@ public:
         state->p_nm1 = p_nm1;
     }
     
-    inline void processHB(T *input, T *output, int numSamples, AllpassState<T> *state) {
+    inline void processHB(T* input, T* output, int numSamples, AllpassState<T>* state) {
         T q_nm1 = state->q_nm1;
         T p_nm1 = state->p_nm1;
         
