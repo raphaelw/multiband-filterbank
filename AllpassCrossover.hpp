@@ -94,7 +94,7 @@ public:
     }
 
     
-    inline void process(T* input, T* output, int numSamples, AllpassState<T>* state) {
+    inline void process(int numSamples, T* input, T* output, AllpassState<T>* state) {
         T q_nm1 = state->q_nm1;
         T p_nm1 = state->p_nm1;
         
@@ -240,6 +240,40 @@ public:
         // reset states
         for (int i = 0; i < (numChannels*numFiltersPerChannel); i++) {
             states[i] = AllpassState<T>();
+        }
+    }
+    
+    // first channel is null
+    inline void process(int channel, int numSamples, T* input, T* outputLowpas, T* outputHighpass) {
+        T* buf1 = outputLowpas;
+        T* buf2 = outputHighpass;
+        if (input == outputHighpass) {
+            // swap input==output pair to lower order section.
+            // in the 1st-order xover case it wont be touched and still be available for the criss-cross step
+            buf1 = outputHighpass;
+            buf2 = outputLowpas;
+        }
+        
+        AllpassState<T>* chState = states+(channel*numFiltersPerChannel);
+        
+        // 1st section
+        for (int i=0; i<offset; i++) {
+            T* in = (i==0) ? input : buf1;
+            filters[i].process(numSamples, in, buf1, chState+i);
+        }
+        // 2nd section
+        for (int i=offset; i<numFiltersPerChannel; i++) {
+            T* in = (i==0) ? input : buf2;
+            filters[i].process(numSamples, in, buf2, chState+i);
+        }
+        
+        // criss-cross
+        for (int i=0; i<numSamples; i++) {
+            T low = (buf1[i] + buf2[i]) / T(2);
+            T hi  = (buf1[i] - buf2[i]) / T(2);
+            
+            outputLowpas[i]   = low;
+            outputHighpass[i] = hi;
         }
     }
     
