@@ -430,7 +430,7 @@ public:
         }
         // 2nd section
         for (int i=offset; i<numFiltersPerChannel; i++) {
-            T* in = (i==0) ? input : buf2;
+            T* in = (i==0) ? input : buf2; // BUG: first loop is (i==offset)
             filters[i].process(channel, numSamples, in, buf2);
         }
         
