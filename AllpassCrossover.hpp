@@ -414,12 +414,12 @@ public:
             buf1 = outputHighpass;
             buf2 = outputLowpass;
         }
+        // from here if input corresponds to one of the outputs: buf2=input
         if (offset == 0) {
             // numPairs = 0; one-pole case
             // swap buffers
-            T* tmp = buf1;
-            buf1 = buf2;
-            buf2 = tmp;
+            buf2 = buf1;  // non-input buffer will written to in the 2nd section
+            buf1 = input; // input is needed and used only in the criss-cross step
         }
         
         
