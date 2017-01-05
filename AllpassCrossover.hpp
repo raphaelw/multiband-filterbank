@@ -424,13 +424,29 @@ public:
         
         
         // 1st section
+        bool firstPass = true;
         for (int i=0; i<offset; i++) {
-            T* in = (i==0) ? input : buf1;
+            T* in;
+            if (firstPass) {
+                firstPass = false;
+                in = input;
+            } else {
+                in = buf1;
+            }
+            
             filters[i].process(channel, numSamples, in, buf1);
         }
         // 2nd section
+        firstPass = true;
         for (int i=offset; i<numFiltersPerChannel; i++) {
-            T* in = (i==0) ? input : buf2; // BUG: first loop is (i==offset)
+            T* in;
+            if (firstPass) {
+                firstPass = false;
+                in = input;
+            } else {
+                in = buf2;
+            }
+            
             filters[i].process(channel, numSamples, in, buf2);
         }
         
