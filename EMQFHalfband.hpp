@@ -16,7 +16,8 @@
 #include <boost/math/special_functions/jacobi_elliptic.hpp>
 
 namespace afx {
-
+namespace emqf {
+    
 /*
  Parameters
  ----------
@@ -117,7 +118,7 @@ int getEMQFHalfbandFilterByStopbandAttenuation(int numPairs, T As, T* squaredPol
 }
 
 
-// Test
+// Test data verified with high precision (mpmath) python implementation
 /*
  getEMQFHalfbandFilterByStopbandAttenuation<double>(5, 44.3, &(betas.front()))
  [0]	double	0.16166891167226929	
@@ -127,4 +128,5 @@ int getEMQFHalfbandFilterByStopbandAttenuation(int numPairs, T As, T* squaredPol
  [4]	double	0.96809905095653459
  */
     
+} // namespace emqf
 } // namespace afx

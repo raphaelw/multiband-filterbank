@@ -15,7 +15,7 @@
 #include "math_constants.h"
 
 namespace afx {
-namespace xover {
+namespace emqf {
 
 // State of delays of a 2nd order allpass, transposed direct form II
 template <typename T>
@@ -154,7 +154,7 @@ struct AllpassState {
 
 // multichannel (statefull) 2nd order allpass, transposed direct form II
 // usage: init, tune, process
-// TODO: use custom allocator for channelStates to achieve an contiguous arena of filters
+// IDEA: use custom allocator for channelStates to achieve an contiguous arena of filters
 template <typename T>
 class AllpassFilterMultichannel {
 public:
@@ -333,8 +333,8 @@ class Crossover {
     //int numChannels; // filters[0].size()
     int offset; // offset to the second filter within the channel
 public:
-    Crossover(int numChannels, int numFiltersPerChannel)
-        : filters( numFiltersPerChannel, AllpassFilterMultichannel<T>(numChannels) )
+    Crossover(int numChannels, int numMaxFiltersPerChannel)
+        : filters(numMaxFiltersPerChannel, AllpassFilterMultichannel<T>(numChannels) )
         , offset(0)
         , numFiltersPerChannel(0)
     {
@@ -345,7 +345,7 @@ public:
     inline void tuneCrossoverFrequency(T f) {
         T alpha_1;
         T alpha;
-        for (int i = 0; i < filters.size(); i++) {
+        for (int i = 0; i < numFiltersPerChannel; i++) {
             if (i==0) {
                 filters[i]._tuneCrossoverFrequency(f, alpha_1, alpha);
             } else {
@@ -355,7 +355,7 @@ public:
         // no smoothing yet -> reset delay states too? would need numChannels
     }
     
-    inline void setEMQFHalfbandFilter(T* betas, int numPairs, int numChannels = 1) {
+    inline void setEMQFHalfbandFilter(T* betas, int numPairs) {
         numFiltersPerChannel = numPairs+1;
         
         bool firstSection;
@@ -414,6 +414,13 @@ public:
             buf1 = outputHighpass;
             buf2 = outputLowpass;
         }
+        if (offset == 0) {
+            // numPairs = 0; one-pole case
+            // swap buffers
+            T* tmp = buf1;
+            buf1 = buf2;
+            buf2 = tmp;
+        }
         
         
         // 1st section
@@ -445,5 +452,5 @@ public:
 
 
     
-} // namespace xover
+} // namespace emqf
 } // namespace afx
