@@ -167,6 +167,10 @@ public:
     
 // crossover owns state, which is allocated outside
 // no bounds checking is done by this class, make shure you allocated engough states & filters
+
+// the xover needs:
+// - filter instances: (numPair+1)=numFiltersPerChannel
+// - states: numChannels*numFiltersPerChannel
 template <typename T>
 class Crossover {
     AllpassFilterStateless<T>* filters;
