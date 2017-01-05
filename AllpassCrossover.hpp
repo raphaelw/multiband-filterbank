@@ -180,7 +180,7 @@ public:
         reset();
     }
     
-    inline void init(AllpassFilterStateless<T>* filters, AllpassState<T>* states, int numChannels = 1) {
+    inline void init(AllpassFilterStateless<T>* filters, AllpassState<T>* states) {
         reset();
         this->filters = filters;
         this->states = states;
