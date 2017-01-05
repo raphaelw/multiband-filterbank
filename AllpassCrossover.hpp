@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <vector>
 #include <cmath>
 
 #include "math_constants.h"
@@ -28,9 +29,135 @@ struct AllpassState {
     
 // stateless (does not own delays) 2nd order allpass, transposed direct form II
 // usage: init, tune, process
+//template <typename T>
+//class AllpassFilterStateless {
+//public:
+//    // coefficients
+//    T a1;
+//    T a2;
+//    
+//    // beta (squared magnitude of the purely imaginary pole
+//    // of the startup half-band filter)
+//    T beta;
+//    
+//    // switch between 1st and 2nd order allpass
+//    bool isBiquad;
+//    
+//    //------------------------------
+//    
+//    // setBeta, setBiquad
+//    // init() ?
+//    
+//    AllpassFilterStateless():a1(0),a2(0),beta(0),isBiquad(true) {}
+//    
+//    inline void init(bool isBiquad, T beta = T(0)) {
+//        // reset coefficients
+//        a1 = T(0);
+//        a2 = T(0);
+//        
+//        this->beta = beta;
+//        this->isBiquad = isBiquad;
+//        // IDEA: tune here to half-band
+//    }
+//    
+//    inline void __tuneCrossoverFrequency(T alpha_1, T alpha) {
+//        if (isBiquad) {
+//            T beta_i = (beta + alpha_1*alpha_1) / (beta*alpha_1*alpha_1 + T(1));
+//            a1 = alpha * (T(1) + beta_i);
+//            a2 = beta_i;
+//        } else {
+//            a1 = alpha_1;
+//        }
+//    }
+//    
+//    inline void _tuneCrossoverFrequency(T frequency, T& _alpha_1, T& _alpha) {
+//        T f_3dB = (T(1)-frequency)/T(2); // mirror and scale
+//        
+//        T alpha;
+//        
+//        T tang = std::tan(M_PI*f_3dB);
+//        T alpha_1 = (T(1)-tang) / (T(1)+tang);
+//        if (isBiquad) {
+//            alpha = (T(1)-(tang*tang)) / (T(1)+(tang*tang));
+//        }
+//        
+//        __tuneCrossoverFrequency(alpha_1, alpha);
+//        
+//        _alpha_1 = alpha_1;
+//        _alpha   = alpha;
+//    }
+//    
+//    // Tune crossover frequency (0=DC, 1=Nyquist)
+//    inline void tuneCrossoverFrequency(T frequency) {
+//        T alpha_1;
+//        T alpha;
+//        _tuneCrossoverFrequency(frequency, alpha_1, alpha);
+//    }
+//
+//    
+//    inline void process(int numSamples, T* input, T* output, AllpassState<T>* state) {
+//        T q_nm1 = state->q_nm1;
+//        T p_nm1 = state->p_nm1;
+//        
+//        for (int i=0; i<numSamples; i++) {
+//            T x = input[i];
+//            
+//            T y;
+//            if (isBiquad) {
+//                // for allpass case: b0 = a2; b1 = a1; b2 = a0 = 1
+//                y = q_nm1 + a2*x;
+//                q_nm1 = p_nm1 + a1*x - a1*y;
+//                p_nm1 = x - a2*y;
+//            } else {
+//                // 1st order
+//                // for allpass case: b0 = a1; b1 = a0 = 1;
+//                y = q_nm1 + a1*x;
+//                q_nm1 = x - a1*y;
+//            }
+//            
+//            output[i] = y;
+//        }
+//        
+//        state->q_nm1 = q_nm1;
+//        state->p_nm1 = p_nm1;
+//    }
+//    
+//    inline void processHB(T* input, T* output, int numSamples, AllpassState<T>* state) {
+//        T q_nm1 = state->q_nm1;
+//        T p_nm1 = state->p_nm1;
+//        
+//        for (int i=0; i<numSamples; i++) {
+//            T x = input[i];
+//            
+//            T y;
+//            if (isBiquad) {
+//                // for allpass/HB case: b0 = a2 = beta; b1 = a1 = 0; b2 = a0 = 1
+//                y = q_nm1 + beta*x;
+//                q_nm1 = p_nm1;
+//                p_nm1 = x - beta*y;
+//            } else {
+//                // pure Delay
+//                y = q_nm1;
+//                q_nm1 = x;
+//            }
+//
+//            output[i] = y;
+//        }
+//        
+//        state->q_nm1 = q_nm1;
+//        state->p_nm1 = p_nm1;
+//    }
+//};
+    
+
+// multichannel (statefull) 2nd order allpass, transposed direct form II
+// usage: init, tune, process
 template <typename T>
-class AllpassFilterStateless {
+class AllpassFilterMultichannel {
 public:
+    // state
+    std::vector< AllpassState<T> > channelStates;
+    
     // coefficients
     T a1;
     T a2;
@@ -47,7 +174,7 @@ public:
     // setBeta, setBiquad
     // init() ?
     
-    AllpassFilterStateless():a1(0),a2(0),beta(0),isBiquad(true) {}
+    AllpassFilterMultichannel():channelStates(numChannels),a1(0),a2(0),beta(0),isBiquad(true) {}
     
     inline void init(bool isBiquad, T beta = T(0)) {
         // reset coefficients
@@ -92,7 +219,7 @@ public:
         T alpha;
         _tuneCrossoverFrequency(frequency, alpha_1, alpha);
     }
-
+    
     
     inline void process(int numSamples, T* input, T* output, AllpassState<T>* state) {
         T q_nm1 = state->q_nm1;
@@ -139,7 +266,7 @@ public:
                 y = q_nm1;
                 q_nm1 = x;
             }
-
+            
             output[i] = y;
         }
         
@@ -147,6 +274,8 @@ public:
         state->p_nm1 = p_nm1;
     }
 };
+
+    
 
 // crossover owns state, which is allocated outside
 // setFilters(AllpassFilterStateless*, int numFilterPerChannel)
