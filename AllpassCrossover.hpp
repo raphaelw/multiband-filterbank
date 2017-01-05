@@ -8,6 +8,8 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+
 #include <cmath>
 
 #include "math_constants.h"
@@ -152,6 +154,7 @@ struct AllpassState {
 
 // multichannel (statefull) 2nd order allpass, transposed direct form II
 // usage: init, tune, process
+// TODO: use custom allocator for channelStates to achieve an contiguous arena of filters
 template <typename T>
 class AllpassFilterMultichannel {
 public:
@@ -174,9 +177,21 @@ public:
     // setBeta, setBiquad
     // init() ?
     
-    AllpassFilterMultichannel():channelStates(numChannels),a1(0),a2(0),beta(0),isBiquad(true) {}
+    AllpassFilterMultichannel(int numChannels)
+        : channelStates(numChannels)
+        , a1(0)
+        , a2(0)
+        , beta(0)
+        , isBiquad(true)
+    {}
     
-    inline void init(bool isBiquad, T beta = T(0)) {
+    inline void resetStates() {
+        std::fill(channelStates.begin(), channelStates.end(), AllpassState<T>());
+    }
+    
+    // note that you should call also call resetStates(),
+    //   especially if the filter order changed
+    inline void setFilter(bool isBiquad, T beta = T(0)) {
         // reset coefficients
         a1 = T(0);
         a2 = T(0);
@@ -221,9 +236,10 @@ public:
     }
     
     
-    inline void process(int numSamples, T* input, T* output, AllpassState<T>* state) {
-        T q_nm1 = state->q_nm1;
-        T p_nm1 = state->p_nm1;
+    inline void process(int channel, int numSamples, T* input, T* output) {
+        AllpassState<T> state = channelStates.at(channel);
+        T q_nm1 = state.q_nm1;
+        T p_nm1 = state.p_nm1;
         
         for (int i=0; i<numSamples; i++) {
             T x = input[i];
@@ -244,13 +260,15 @@ public:
             output[i] = y;
         }
         
-        state->q_nm1 = q_nm1;
-        state->p_nm1 = p_nm1;
+        state.q_nm1 = q_nm1;
+        state.p_nm1 = p_nm1;
+        channelStates[channel] = state;
     }
     
-    inline void processHB(T* input, T* output, int numSamples, AllpassState<T>* state) {
-        T q_nm1 = state->q_nm1;
-        T p_nm1 = state->p_nm1;
+    inline void processHB(int channel, int numSamples, T* input, T* output) {
+        AllpassState<T> state = channelStates.at(channel);
+        T q_nm1 = state.q_nm1;
+        T p_nm1 = state.p_nm1;
         
         for (int i=0; i<numSamples; i++) {
             T x = input[i];
@@ -270,8 +288,9 @@ public:
             output[i] = y;
         }
         
-        state->q_nm1 = q_nm1;
-        state->p_nm1 = p_nm1;
+        state.q_nm1 = q_nm1;
+        state.p_nm1 = p_nm1;
+        channelStates[channel] = state;
     }
 };
 
@@ -302,33 +321,31 @@ public:
 // - states: numChannels*numFiltersPerChannel
 template <typename T>
 class Crossover {
-    AllpassFilterStateless<T>* filters;
-    AllpassState<T>* states;
+    // member types -------------------
+    typedef std::vector< AllpassFilterMultichannel<T> > FilterList;
+    typedef typename FilterList::iterator FilterIterator;
     
-    int numFiltersPerChannel;
-    //int numChannels;
+    // members ------------------------
+    FilterList filters;
+    
+    
+    int numFiltersPerChannel; // number of ACTIVE filters
+    //int numChannels; // filters[0].size()
     int offset; // offset to the second filter within the channel
 public:
-    Crossover() {
-        reset();
+    Crossover(int numChannels, int numFiltersPerChannel)
+        : filters( numFiltersPerChannel, AllpassFilterMultichannel<T>(numChannels) )
+        , offset(0)
+        , numFiltersPerChannel(0)
+    {
+        //reset();
     }
     
-    inline void init(AllpassFilterStateless<T>* filters, AllpassState<T>* states) {
-        reset();
-        this->filters = filters;
-        this->states = states;
-    }
-    
-    inline void reset() {
-        numFiltersPerChannel = offset = 0;
-        filters = nullptr;
-        states = nullptr;
-    }
     
     inline void tuneCrossoverFrequency(T f) {
         T alpha_1;
         T alpha;
-        for (int i=0; i<numFiltersPerChannel; i++) {
+        for (int i = 0; i < filters.size(); i++) {
             if (i==0) {
                 filters[i]._tuneCrossoverFrequency(f, alpha_1, alpha);
             } else {
@@ -348,12 +365,15 @@ public:
             firstSection = true;
         } else {
             // section without real pole has lower order
-            offset = (numPairs/2);
+            offset = numPairs/2;
             firstSection = false;
         }
         
-        AllpassFilterStateless<T>* firstSectionFilter  = filters+offset-1;
-        AllpassFilterStateless<T>* secondSectionFilter = filters+numFiltersPerChannel-1;
+        FilterIterator firstSectionFilter  = filters.begin()+offset-1;
+        FilterIterator secondSectionFilter = filters.begin()+numFiltersPerChannel-1;
+        
+        //AllpassFilterStateless<T>* firstSectionFilter  = filters+offset-1;
+        //AllpassFilterStateless<T>* secondSectionFilter = filters+numFiltersPerChannel-1;
         
         for (int i = 0; i < numFiltersPerChannel; i++) {
             T beta = 0;
@@ -367,23 +387,23 @@ public:
             }
             
             if (firstSection) {
-                firstSectionFilter->init(isBiquad, beta);
+                firstSectionFilter->setFilter(isBiquad, beta);
+                firstSectionFilter->resetStates();
+                
                 firstSectionFilter--;
             } else {
-                secondSectionFilter->init(isBiquad, beta);
+                secondSectionFilter->setFilter(isBiquad, beta);
+                secondSectionFilter->resetStates();
+                
                 secondSectionFilter--;
             }
             
             firstSection = (!firstSection); // switch section
         }
-
-        // reset states
-        for (int i = 0; i < (numChannels*numFiltersPerChannel); i++) {
-            states[i] = AllpassState<T>();
-        }
     }
     
     // first channel is zero
+    // case numPairs==0: only works if one of the output buffers is also input
     inline void process(int channel, int numSamples
                         , T* input, T* outputLowpass, T* outputHighpass
                         , bool onlyLowpass = false) {
@@ -395,17 +415,16 @@ public:
             buf2 = outputLowpass;
         }
         
-        AllpassState<T>* chState = states+(channel*numFiltersPerChannel);
         
         // 1st section
         for (int i=0; i<offset; i++) {
             T* in = (i==0) ? input : buf1;
-            filters[i].process(numSamples, in, buf1, chState+i);
+            filters[i].process(channel, numSamples, in, buf1);
         }
         // 2nd section
         for (int i=offset; i<numFiltersPerChannel; i++) {
             T* in = (i==0) ? input : buf2;
-            filters[i].process(numSamples, in, buf2, chState+i);
+            filters[i].process(channel, numSamples, in, buf2);
         }
         
         // criss-cross
