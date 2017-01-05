@@ -205,7 +205,7 @@ public:
         // no smoothing yet -> reset delay states too? would need numChannels
     }
     
-    inline void setEMQFHalfbandFilter(T* betas, int numPairs, int numChannels) {
+    inline void setEMQFHalfbandFilter(T* betas, int numPairs, int numChannels = 1) {
         numFiltersPerChannel = numPairs+1;
         
         bool firstSection;
