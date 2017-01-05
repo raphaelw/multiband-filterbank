@@ -34,5 +34,5 @@ namespace afx {
 } // namespace afx
 
 
-#endif
+#endif // __AFX_MATH_CONSTANTS__
 

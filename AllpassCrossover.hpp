@@ -159,6 +159,12 @@ public:
 // processHB(int channel, int numSamples, in, outLow, outHigh)
 // processPhase(int channel, int numSamples, in, out)
 
+// TODO:
+    // verify pole distribution (both cases, numPair odd&even) in debugging mode
+    // ? verify tuning formula ?
+    
+    // implement rest of methods: minimum processPhase()
+    
 // crossover owns state, which is allocated outside
 // no bounds checking is done by this class, make shure you allocated engough states & filters
 template <typename T>
