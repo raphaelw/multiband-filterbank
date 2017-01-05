@@ -158,7 +158,8 @@ public:
 // process(int channel, int numSamples, in, outLow, outHigh)
 // processHB(int channel, int numSamples, in, outLow, outHigh)
 // processPhase(int channel, int numSamples, in, out)
-    
+
+// crossover owns state, which is allocated outside
 // no bounds checking is done by this class, make shure you allocated engough states & filters
 template <typename T>
 class Crossover {
@@ -243,15 +244,16 @@ public:
         }
     }
     
-    // first channel is null
-    inline void process(int channel, int numSamples, T* input, T* outputLowpas, T* outputHighpass) {
-        T* buf1 = outputLowpas;
+    // first channel is zero
+    inline void process(int channel, int numSamples
+                        , T* input, T* outputLowpass, T* outputHighpass
+                        , bool onlyLowpass = false) {
+        T* buf1 = outputLowpass;
         T* buf2 = outputHighpass;
-        if (input == outputHighpass) {
-            // swap input==output pair to lower order section.
-            // in the 1st-order xover case it wont be touched and still be available for the criss-cross step
+        if (input == outputLowpass) {
+            // swap to prevent overwriting of input in 1st section
             buf1 = outputHighpass;
-            buf2 = outputLowpas;
+            buf2 = outputLowpass;
         }
         
         AllpassState<T>* chState = states+(channel*numFiltersPerChannel);
@@ -270,10 +272,13 @@ public:
         // criss-cross
         for (int i=0; i<numSamples; i++) {
             T low = (buf1[i] + buf2[i]) / T(2);
-            T hi  = (buf1[i] - buf2[i]) / T(2);
             
-            outputLowpas[i]   = low;
-            outputHighpass[i] = hi;
+            if (!onlyLowpass) {
+                T hi  = (buf1[i] - buf2[i]) / T(2);
+                outputHighpass[i] = hi;
+            }
+            
+            outputLowpass[i] = low;
         }
     }
     
