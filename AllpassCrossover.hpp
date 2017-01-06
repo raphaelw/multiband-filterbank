@@ -289,8 +289,8 @@ public:
         if (offset == 0) {
             // numPairs = 0; one-pole case
             // swap buffers
-            buf2 = buf1;  // non-input buffer will written to in the 2nd section
-            buf1 = input; // input is needed and used only in the criss-cross step
+            buf2 = buf1;  // non-input buffer; 2nd section will write to the buffer
+            buf1 = input; // (read-only) input is needed and used only in the criss-cross step
         }
         
         
