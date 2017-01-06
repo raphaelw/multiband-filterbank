@@ -188,12 +188,8 @@ public:
 
     
 // crossover owns state
-// no bounds checking is done by this class, make shure you allocated engough filters
-    // a crossover initialized with numMaxFiltersPerChannel
-
-// the xover needs:
-// - filter instances: (numPair+1)=numFiltersPerChannel
-// - states: numChannels*numFiltersPerChannel
+// no bounds checking is done by this class, make shure you don't exceed "numPairs"
+    // when setting the startup half-band filter
 template <typename T>
 class Crossover {
     // member types -------------------
@@ -203,10 +199,8 @@ class Crossover {
     // members ------------------------
     FilterList filters;
     
-    
     int numFiltersPerChannel; // number of ACTIVE filters
-    //int numChannels; // filters[0].size()
-    int offset; // offset to the second filter within the channel
+    int offset; // offset to the second filter section
 public:
     // numChannels : number of available channels
     // numPairs    : maximum order N = (numPairs*2+1) an instance is able to process
@@ -229,7 +223,7 @@ public:
                 filters[i].__tuneCrossoverFrequency(alpha_1, alpha);
             }
         }
-        // no smoothing yet -> reset delay states too? would need numChannels
+        // no smoothing yet -> reset delay states too?
     }
     
     inline void setEMQFHalfbandFilter(T* betas, int numPairs) {
