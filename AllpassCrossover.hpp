@@ -65,7 +65,7 @@ public:
         std::fill(channelStates.begin(), channelStates.end(), AllpassState<T>());
     }
     
-    // note that you should call also call resetStates(),
+    // note that you should also call resetStates(),
     //   especially if the filter order changed
     inline void setFilter(bool isBiquad, T beta = T(0)) {
         // reset coefficients
