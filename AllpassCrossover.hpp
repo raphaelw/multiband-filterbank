@@ -273,6 +273,7 @@ public:
         }
     }
     
+
     // first channel is zero
     // case numPairs==0: only works if one of the output buffers is also input
     inline void process(int channel, int numSamples
@@ -334,6 +335,21 @@ public:
         }
     }
     
+    // phase compensation // only applies the first allpass section
+    inline void processPhase(int channel, int numSamples, T* input, T* output) {
+        bool firstPass = true;
+        for (int i=0; i<offset; i++) {
+            T* in;
+            if (firstPass) {
+                firstPass = false;
+                in = input;
+            } else {
+                in = output;
+            }
+            
+            filters[i].process(channel, numSamples, in, output);
+        }
+    }
     
 };
 
