@@ -131,8 +131,8 @@ public:
         
         for (int i=0; i<numSamples; i++) {
             T x = input[i];
-            
             T y;
+            
             if (TUNABLE) {
                 if (isBiquad) {
                     // for allpass case: b0 = a2; b1 = a1; b2 = a0 = 1
@@ -190,7 +190,8 @@ public:
 template <typename T, bool TUNABLE = true>
 class Crossover {
     // member types -------------------
-    typedef std::vector< AllpassFilterMultichannel<T,TUNABLE> > FilterList;
+    typedef AllpassFilterMultichannel<T,TUNABLE> FilterType;
+    typedef std::vector< FilterType > FilterList;
     typedef typename FilterList::iterator FilterIterator;
     
     // members ------------------------
@@ -204,7 +205,7 @@ public:
     // numChannels : number of available channels
     // numPairs    : maximum order N = (numPairs*2+1) an instance is able to process
     Crossover(int numChannels, int numPairs)
-        : filters(numPairs+1, AllpassFilterMultichannel<T>(numChannels) )
+        : filters(numPairs+1, FilterType(numChannels) )
         , offset(0)
         , numFiltersPerChannel(0)
     {
