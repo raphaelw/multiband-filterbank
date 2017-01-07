@@ -273,17 +273,17 @@ public:
                 beta = betas[i-1];
             }
             
+            FilterIterator chosenFilter;
             if (firstSection) {
-                firstSectionFilter->setFilter(isBiquad, beta);
-                firstSectionFilter->resetStates();
-                
+                chosenFilter = firstSectionFilter;
                 firstSectionFilter--;
             } else {
-                secondSectionFilter->setFilter(isBiquad, beta);
-                secondSectionFilter->resetStates();
-                
+                chosenFilter = secondSectionFilter;
                 secondSectionFilter--;
             }
+            
+            chosenFilter->setFilter(isBiquad, beta);
+            chosenFilter->resetStates();
             
             firstSection = (!firstSection); // switch section
         }
