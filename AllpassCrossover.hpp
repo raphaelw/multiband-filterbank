@@ -32,6 +32,8 @@ struct AllpassState {
 // usage: setFilter, tune, resetStates, process
     // in half-band processing mode tuning is not needed
 // IDEA: use custom allocator for channelStates to achieve an contiguous arena of filters
+
+// TODO: denormal number prevention
     
 // Reference:
 // [1] "Power-Complementary IIR Filter Pairs with an Adjustable
@@ -125,7 +127,7 @@ public:
     
     
     inline void process(int channel, int numSamples, T* input, T* output) {
-        AllpassState<T> state = channelStates.at(channel);
+        AllpassState<T> state = channelStates[channel];// channelStates.at(channel);
         T q_nm1 = state.q_nm1;
         T p_nm1 = state.p_nm1;
         
@@ -285,12 +287,12 @@ public:
     inline void process(int channel, int numSamples
                         , T* input, T* outputLowpass, T* outputHighpass
                         , bool onlyLowpass = false) {
-        T* buf1 = outputLowpass;
-        T* buf2 = outputHighpass;
-        if (input == outputLowpass) {
+        T* buf1 = outputHighpass;
+        T* buf2 = outputLowpass;
+        if (buf1 == input) {
             // swap to prevent overwriting of input in 1st section
-            buf1 = outputHighpass;
-            buf2 = outputLowpass;
+            buf1 = outputLowpass;
+            buf2 = outputHighpass;
         }
         // from here if input corresponds to one of the outputs: buf2=input
         if (offset == 0) {
@@ -342,8 +344,14 @@ public:
     }
     
     // phase compensation // only applies the first allpass section
-    // TODO: one-pole case: copy input to output, if in!=out
     inline void processPhase(int channel, int numSamples, T* input, T* output) {
+        if (offset == 0) { // one-pole case
+            if (input != output) {
+                std::copy(input, input+numSamples, output);
+            }
+            return;
+        }
+        
         bool firstPass = true;
         for (int i=0; i<offset; i++) {
             T* in;
