@@ -32,6 +32,10 @@ struct AllpassState {
 // usage: setFilter, tune, resetStates, process
     // in half-band processing mode tuning is not needed
 // IDEA: use custom allocator for channelStates to achieve an contiguous arena of filters
+    
+// Reference:
+// [1] "Power-Complementary IIR Filter Pairs with an Adjustable
+//     Crossover Frequency", Ljiljana Milic & Tapio Saramaki
 template <typename T>
 class AllpassFilterMultichannel {
 public:
@@ -89,7 +93,14 @@ public:
     }
     
     inline void _tuneCrossoverFrequency(T frequency, T& _alpha_1, T& _alpha) {
-        T f_3dB = (T(1)-frequency)/T(2); // mirror and scale
+        // Tuning formulae given by the paper [1]:
+        // Note that the f_3dB parameter in the paper's formulae only works with
+        // f_3dB mirrored at the nyquist frequency. (0.5 in the paper)
+        // therefore: f_3dB_correct = nyquist - f_3dB
+        
+        T f_3dB = T(1) - frequency; // mirror at nyquist
+        // scale such that nyquist corresponds to the paper's nyquist (0.5)
+        f_3dB = f_3dB / T(2);
         
         T alpha;
         
@@ -202,6 +213,8 @@ class Crossover {
     
     int numFiltersPerChannel; // number of ACTIVE filters
     int offset; // offset to the second filter section
+    
+    T crossoverFrequency;
 public:
     // numChannels : number of available channels
     // numPairs    : maximum order N = (numPairs*2+1) an instance is able to process
@@ -215,6 +228,8 @@ public:
     
     
     inline void tuneCrossoverFrequency(T f) {
+        crossoverFrequency = f;
+        
         T alpha_1;
         T alpha;
         for (int i = 0; i < numFiltersPerChannel; i++) {
@@ -272,6 +287,9 @@ public:
             
             firstSection = (!firstSection); // switch section
         }
+        
+        // retune
+        tuneCrossoverFrequency(crossoverFrequency);
     }
     
 
