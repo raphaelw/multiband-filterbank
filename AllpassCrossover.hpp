@@ -208,6 +208,7 @@ public:
         : filters(numPairs+1, FilterType(numChannels) )
         , offset(0)
         , numFiltersPerChannel(0)
+        , crossoverFrequency(T(1)/T(2))
     {
         //reset();
     }
