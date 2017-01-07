@@ -36,7 +36,7 @@ struct AllpassState {
 // Reference:
 // [1] "Power-Complementary IIR Filter Pairs with an Adjustable
 //     Crossover Frequency", Ljiljana Milic & Tapio Saramaki
-template <typename T>
+template <typename T, bool TUNABLE = true>
 class AllpassFilterMultichannel {
 public:
     // state
@@ -133,44 +133,29 @@ public:
             T x = input[i];
             
             T y;
-            if (isBiquad) {
-                // for allpass case: b0 = a2; b1 = a1; b2 = a0 = 1
-                y = q_nm1 + a2*x;
-                q_nm1 = p_nm1 + a1*x - a1*y;
-                p_nm1 = x - a2*y;
-            } else {
-                // 1st order
-                // for allpass case: b0 = a1; b1 = a0 = 1;
-                y = q_nm1 + a1*x;
-                q_nm1 = x - a1*y;
-            }
-            
-            output[i] = y;
-        }
-        
-        state.q_nm1 = q_nm1;
-        state.p_nm1 = p_nm1;
-        channelStates[channel] = state;
-    }
-    
-    inline void processHB(int channel, int numSamples, T* input, T* output) {
-        AllpassState<T> state = channelStates.at(channel);
-        T q_nm1 = state.q_nm1;
-        T p_nm1 = state.p_nm1;
-        
-        for (int i=0; i<numSamples; i++) {
-            T x = input[i];
-            
-            T y;
-            if (isBiquad) {
-                // for allpass/HB case: b0 = a2 = beta; b1 = a1 = 0; b2 = a0 = 1
-                y = q_nm1 + beta*x;
-                q_nm1 = p_nm1;
-                p_nm1 = x - beta*y;
-            } else {
-                // pure Delay
-                y = q_nm1;
-                q_nm1 = x;
+            if (TUNABLE) {
+                if (isBiquad) {
+                    // for allpass case: b0 = a2; b1 = a1; b2 = a0 = 1
+                    y = q_nm1 + a2*x;
+                    q_nm1 = p_nm1 + a1*x - a1*y;
+                    p_nm1 = x - a2*y;
+                } else {
+                    // 1st order
+                    // for allpass case: b0 = a1; b1 = a0 = 1;
+                    y = q_nm1 + a1*x;
+                    q_nm1 = x - a1*y;
+                }
+            } else { // Half-band only processing
+                if (isBiquad) {
+                    // for allpass/HB case: b0 = a2 = beta; b1 = a1 = 0; b2 = a0 = 1
+                    y = q_nm1 + beta*x;
+                    q_nm1 = p_nm1;
+                    p_nm1 = x - beta*y;
+                } else {
+                    // pure Delay
+                    y = q_nm1;
+                    q_nm1 = x;
+                }
             }
             
             output[i] = y;
@@ -202,10 +187,10 @@ public:
 // crossover owns state
 // no bounds checking is done by this class, make shure you don't exceed "numPairs"
     // when setting the startup half-band filter
-template <typename T>
+template <typename T, bool TUNABLE = true>
 class Crossover {
     // member types -------------------
-    typedef std::vector< AllpassFilterMultichannel<T> > FilterList;
+    typedef std::vector< AllpassFilterMultichannel<T,TUNABLE> > FilterList;
     typedef typename FilterList::iterator FilterIterator;
     
     // members ------------------------
