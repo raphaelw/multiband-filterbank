@@ -29,7 +29,8 @@ struct AllpassState {
     
 
 // multichannel (statefull) 2nd order allpass, transposed direct form II
-// usage: init, tune, process
+// usage: setFilter, tune, process
+    // in half-band processing mode tuning is not needed
 // IDEA: use custom allocator for channelStates to achieve an contiguous arena of filters
 template <typename T>
 class AllpassFilterMultichannel {
