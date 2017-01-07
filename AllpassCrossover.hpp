@@ -336,6 +336,7 @@ public:
     }
     
     // phase compensation // only applies the first allpass section
+    // TODO: one-pole case: copy input to output, if in!=out
     inline void processPhase(int channel, int numSamples, T* input, T* output) {
         bool firstPass = true;
         for (int i=0; i<offset; i++) {
