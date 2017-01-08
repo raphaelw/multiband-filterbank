@@ -187,7 +187,7 @@ public:
 
     
 // crossover owns state
-// no bounds checking is done by this class, make shure you don't exceed "numPairs"
+// no bounds checking is done by this class, make sure you don't exceed "numPairs"
     // when setting the startup half-band filter
 template <typename T, bool TUNABLE = true>
 class Crossover {
