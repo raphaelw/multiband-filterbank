@@ -176,12 +176,10 @@ public:
     // verify pole distribution (both cases, numPair odd&even) in debugging mode
     // ? verify impulse response & proper processing
     // ? verify tuning formula ?
-
-// TODO:
     // implement rest of methods: minimum processPhase()
     // automatic retuning after resetting the startup half-band filter (frequency as a member)
         // auto state reset ?
-    
+// TODO:
     // nicer code: conflate e.g. 1st & 2nd section in process method
         // also 1st & 2nd section switching setEMQFHalfbandFilter()
 
