@@ -59,7 +59,7 @@ public:
     // the last stage's highpass will be split up
     // first channel is zero
     inline void process(int channel, int numSamples, T* input, T** outputs) {
-        int numStages = crossovers.size();
+        int numStages = static_cast<int>(crossovers.size());
         T* bufferToSplit = input;
 
         for (int i = 0 ; i < numStages; i++) {
