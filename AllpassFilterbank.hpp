@@ -38,10 +38,10 @@ public:
     TCrossoverList crossovers;
     
     // methods ------------------------
-    Filterbank(int numStages, int maxNumPairs) {
+    Filterbank(int numStages, int numChannels, int maxNumPairs) {
         crossovers.reserve(numStages);
         for (int i = 0; i < numStages; i++) {
-            crossovers.push_back(TCrossover(i+1, maxNumPairs));
+            crossovers.push_back(TCrossover( (i+1)*numChannels , maxNumPairs ));
         }
     }
     
@@ -57,18 +57,22 @@ public:
     }
     
     // the last stage's highpass will be split up
-    inline void process(int numSamples, T* input, T** outputs) {
+    // first channel is zero
+    inline void process(int channel, int numSamples, T* input, T** outputs) {
+        int numStages = crossovers.size();
         T* bufferToSplit = input;
 
-        for (int i = 0 ; i < crossovers.size(); i++) {
+        for (int i = 0 ; i < numStages; i++) {
+            int chOffset = (i+1)*channel;
             T* outLP = outputs[i];
             T* outHP = outputs[i+1];
-            crossovers[i].process(0, numSamples, bufferToSplit, outLP, outHP);
+            
+            crossovers[i].process(chOffset+0, numSamples, bufferToSplit, outLP, outHP);
             
             bufferToSplit = outHP;
             
             for (int k = 0; k < i; k++) {
-                crossovers[i].processPhase(k+1, numSamples, outputs[k], outputs[k]);
+                crossovers[i].processPhase(chOffset+(k+1), numSamples, outputs[k], outputs[k]);
             }
         }
     }
