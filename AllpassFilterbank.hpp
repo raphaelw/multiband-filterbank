@@ -13,18 +13,7 @@
 
 namespace afx {
 namespace emqf {
-
-// Filterbank
-    // buffers? -> maxBlockSize -> outside
-    // numChannels -> numStages !
-    // set EMQF startup-filter: betas or attenuation?
     
-    // tune!
-    
-    // process
-        // numSamples
-        // inputBuffer
-        // array of outputBuffers? T**
     
 template <typename T>
 class Filterbank {
@@ -56,8 +45,9 @@ public:
         crossovers[stage].tuneCrossoverFrequency(frequency);
     }
     
-    // the last stage's highpass will be split up
-    // first channel is zero
+    // - the last stage's highpass will be split up
+    // - first channel is zero
+    // - outputs is an array of pointers to outputBuffers from low to high bands
     inline void process(int channel, int numSamples, T* input, T** outputs) {
         int numStages = static_cast<int>(crossovers.size());
         T* bufferToSplit = input;
