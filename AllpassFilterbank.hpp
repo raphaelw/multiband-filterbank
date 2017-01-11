@@ -1,8 +1,8 @@
 //
 //  AllpassFilterbank.hpp
 //
-//  Created by Raphael Pistachio on 22.12.16.
-//  Copyright (c) 2016 Raphael Pistachio. All rights reserved.
+//  Created by Raphael Pistachio
+//  Copyright (c) 2017 Raphael Pistachio. All rights reserved.
 //
 
 #pragma once
