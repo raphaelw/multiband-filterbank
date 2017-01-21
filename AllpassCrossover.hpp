@@ -229,6 +229,12 @@ public:
         // no smoothing yet -> reset delay states too?
     }
     
+    inline void resetState() {
+        for (int i = 0; i < numFiltersPerChannel; i++) {
+            filters[i].resetStates();
+        }
+    }
+    
     inline void setEMQFHalfbandFilter(T* betas, int numPairs) {
         numFiltersPerChannel = numPairs+1;
         
