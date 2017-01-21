@@ -30,7 +30,7 @@ public:
     Filterbank(int numStages, int numChannels, int maxNumPairs) {
         crossovers.reserve(numStages);
         for (int i = 0; i < numStages; i++) {
-            crossovers.push_back(TCrossover( (i+1)*numChannels , maxNumPairs ));
+            crossovers.push_back(TCrossover( (i+1)*numChannels , maxNumPairs+1 ));
         }
     }
     

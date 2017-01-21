@@ -204,8 +204,8 @@ class Crossover {
 public:
     // numChannels : number of available channels
     // numPairs    : maximum order N = (numPairs*2+1) an instance is able to process
-    Crossover(int numChannels, int numPairs)
-        : filters(numPairs+1, FilterType(numChannels) )
+    Crossover(int numChannels, int numFilters)
+        : filters(numFilters, FilterType(numChannels) )
         , offset(0)
         , numFiltersPerChannel(0)
         , crossoverFrequency(T(1)/T(2))
