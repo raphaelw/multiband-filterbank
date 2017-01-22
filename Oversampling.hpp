@@ -50,7 +50,7 @@ public:
         
         int outputOffset = newSize-2;
         for (int i = (numSamples-1); i >= 0; i--) {
-            output[outputOffset]   = input[i];
+            output[outputOffset]   = input[i]*T(2); // compensate energy loss // Lyons' Book: [10.5.1] Time and Frequency Properties of Interpolation
             output[outputOffset+1] = T(0);
             
             outputOffset -= 2;
