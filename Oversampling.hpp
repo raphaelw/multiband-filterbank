@@ -93,9 +93,6 @@ public:
             
             
             if (UPWARD) {
-                /*process(int channel, int numSamples
-                 , T* input, T* outputLowpass, T* outputHighpass
-                 , bool onlyLowpass = false)*/
                 xover.process(mappedFilterChannel, currentNumSamples, samples, samples, tmpBuffer, true);
             }
         }
