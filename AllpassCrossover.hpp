@@ -336,9 +336,11 @@ public:
         
         // criss-cross
         for (int i=0; i<numSamples; i++) {
-            T low = (buf1[i] + buf2[i]) / T(2);
-            
+            T low = (buf1[i] + buf2[i]);
+
             if (!onlyLowpass) {
+                low = low / T(2);
+                
                 T hi  = (buf1[i] - buf2[i]) / T(2);
                 outputHighpass[i] = hi;
             }
