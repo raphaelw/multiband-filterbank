@@ -1,5 +1,5 @@
 //
-//  Oversampling.hpp
+//  Resampling.hpp
 //
 //  Created by Raphael Pistachio
 //  Copyright (c) 2017 Raphael Pistachio. All rights reserved.
