@@ -25,10 +25,10 @@ class Resampler {
 
     T* tmpBuffer; // temporary buffer for the xover
 public:
-    Resampler(int numChannels = 0, int numPairs = 0, int numStages = 3, T* tmpBuffer = nullptr)
-        :xover(numChannels*numStages, numPairs+1)
+    Resampler(int numChannels = 0, int numPairs = 0, int maxNumStages = 3, T* tmpBuffer = nullptr)
+        :xover(numChannels*maxNumStages, numPairs+1)
         ,numStages(0)
-        ,maxNumStages(numStages)
+        ,maxNumStages(maxNumStages)
         ,tmpBuffer(tmpBuffer)
     {}
     
