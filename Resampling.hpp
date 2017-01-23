@@ -16,7 +16,7 @@ namespace afx {
 namespace emqf {
     
 
-template <typename T, bool UPWARD = true>
+template <typename T, bool UPWARD>
 class Resampler {
     // members -------------------------
     Crossover<T, false> xover;
