@@ -33,8 +33,10 @@ public:
     {}
     
     inline void setNumStages(int numStages) {
-        this->numStages = numStages;
-        xover.resetState();
+        if ((this->numStages) != numStages) {
+            this->numStages = numStages;
+            xover.resetState();
+        }
     }
     
     inline void setTempBuffer(T* tmp) {
