@@ -27,7 +27,7 @@ public:
     TCrossoverList crossovers;
     
     // methods ------------------------
-    Filterbank(int numStages, int numChannels, int maxNumPairs) {
+    Filterbank(int numStages = 0, int numChannels = 0, int maxNumPairs = 0) {
         crossovers.reserve(numStages);
         for (int i = 0; i < numStages; i++) {
             crossovers.push_back(TCrossover( (i+1)*numChannels , maxNumPairs+1 ));
