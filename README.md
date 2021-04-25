@@ -1,5 +1,5 @@
 # Multiband Filterbank
-Audio filterbank for real-time audio signal processing. You can choose:
+Audio filterbank for real-time audio signal processing implemented in C++. You can choose:
 * Number of frequency bands
 * Filter order
 * Stopband attenuation
@@ -21,3 +21,4 @@ Each filterbank stage uses a crossover filter based on IIR filters of type EMQF 
 
 ## TODO
 * Implement better filter structure that is more suitable for time-varying operation. (Vadim Zavalishin's TPT)
+* Prevent denormal numbers driving up CPU load when filter states are decayed.
