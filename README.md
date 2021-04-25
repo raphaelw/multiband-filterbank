@@ -1,5 +1,10 @@
 # Multiband Filterbank
-Audio filterbank for real-time audio signal processing. Filter order and number of frequency bands can be chosen.
+Audio filterbank for real-time audio signal processing. You can choose:
+* Number of frequency bands
+* Filter order
+* Stopband attenuation
+
+*The library also contains a basic Up-/Downsampler. See `Resampling.hpp`*
 
 ## Details
 Implements a filterbank that is allpass complementary meaning that it has a flat frequency response with some unnoticable phase distortion.
