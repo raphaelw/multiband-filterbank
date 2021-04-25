@@ -4,7 +4,7 @@ Audio filterbank for real-time audio signal processing implemented in C++. You c
 * Filter order
 * Stopband attenuation
 
-*The library also contains a basic Up-/Downsampler. See `Resampling.hpp`*
+*The project also contains a basic Up-/Downsampler. See `Resampling.hpp`*
 
 ## Details
 Implements a filterbank that is allpass complementary meaning that it has a flat frequency response with some unnoticable phase distortion.
